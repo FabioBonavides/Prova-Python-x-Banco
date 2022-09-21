@@ -1,0 +1,160 @@
+from datetime import datetime
+import pymysql.cursors
+
+conexao = pymysql.connect(host='localhost',
+                          user='root',
+                          password='admin',
+                          database='trabalho',
+                          cursorclass=pymysql.cursors.DictCursor
+                          )
+
+class Usuarios:
+    def __init__(self):
+        self.__nome = ''
+        self.__email = ''
+        self.__senha = ''
+        
+
+    def get_nome(self):
+        return self.__nome
+
+    def set_nome(self, nome):
+        self.__nome = nome
+
+    def get_email(self):
+        return self.__email
+
+    def set_email(self, email):
+        self.__email = email
+
+    def get_senha(self):
+        return self.__senha
+
+    def set_senha(self, senha):
+        self.__senha = senha   
+
+ 
+    
+class Operacoes:
+    def inserirDados(self):
+        with conexao.cursor() as cursor:
+            #for aluno in self.lista:
+            usuario = Usuarios()
+            usuario.set_nome(input('Digite o nome: '))
+            usuario.set_email(input('Informe o email: '))
+            usuario.set_senha(input('Informe a senha: ')) 
+            x = datetime.now()  
+            data_criacao = x.strftime('%d/%m/%Y')                         
+            sql = 'insert into usuarios(nome, email, senha, data_criacao)values(%s, %s, %s, %s)'
+            cursor.execute(sql, (usuario.get_nome(), usuario.get_email(), usuario.get_senha(), data_criacao))
+            conexao.commit()
+            #print(usuario.set_data_criacao())
+            print('Usuário cadastrado!')
+            print('---------------------------------')
+                          
+
+    def editarDados(self):
+        usuario = Usuarios()
+        usuario.set_nome(input('Digite o novo nome: '))
+        usuario.set_email(input('Informe o novo email: '))
+        usuario.set_senha(input('Informe a nova senha: ')) 
+        id = int(input('Digite o id: '))
+        with conexao.cursor() as cursor:
+            sql = 'update usuarios set nome = %s, email = %s, senha = %s where idusuario = %s'
+            x = cursor.execute(sql, (usuario.get_nome(), usuario.get_email(), usuario.get_senha(), id))
+            if x > 0:            
+                conexao.commit()
+                print('Cadastro atualizado!')
+                print('---------------------------------')
+            else:
+                print('Aluno inexistente!')
+                print('---------------------------------')
+                
+    def excluirDados(self):
+        id = int(input('Informe o id do usuário que deseja excluir: '))
+        with conexao.cursor() as cursor:
+            sql = 'delete from usuarios where idusuario = %s'
+            z = cursor.execute(sql, (id,))
+            if z > 0:                
+                conexao.commit()
+                print('Aluno excluído!')
+                print('---------------------------------')
+            else:
+                print('Aluno inexistente!')
+                print('---------------------------------')       
+    
+    def listarDados(self):        
+        with conexao.cursor() as cursor:            
+            cursor.execute('select * from usuarios')
+            resultado = cursor. fetchall()         
+            for res in resultado:
+                print(f'Nome: {res["nome"]}\nEmail: {res["email"]}\nSenha: {res["senha"]}\nData de Criação: {res["data_criacao"]}\nID: {res["idusuario"]}')
+                print('---------------------------------')  
+                                            
+                              
+class Menu():
+    while True:
+        pergunta = input('Deseja fazer qual operação no banco de dados? '
+                         '\n1.Inserir novo aluno'
+                         '\n2.Editar o cadastro de algum aluno.'
+                         '\n3.Excluir algum aluno.'
+                         '\n4.Listar os alunos.'
+                         '\n5.Sair'
+                         '\n')
+        
+        if pergunta == '1':            
+             while True:
+                operacao = Operacoes()                      
+                operacao.inserirDados() 
+                perg = int(input('Deseja fazer novo cadastro:\n1.sim\n2.não\n'))
+                if perg == 1:
+                    pass
+                elif perg == 2:
+                    break
+                else:
+                    print('Tente novamente!')
+
+        elif pergunta == '2':
+            while True:
+                operacao = Operacoes()
+                operacao.editarDados()
+                perg = int(input('Deseja editar o cadastro de outro aluno? \n1.Sim\n2.Não\n'))
+                if perg == 1:
+                    pass
+                elif perg == 2:
+                    break 
+                else:
+                    print('tente novamente!')
+                    
+        elif pergunta == '3':
+            while True:
+                operacao = Operacoes()
+                operacao.excluirDados()  
+                perg = int(input('Deseja excluir o cadastro de outro aluno? \n1.Sim\n2.Não\n'))
+                if perg == 1:
+                    pass
+                elif perg == 2:
+                    break 
+                else:
+                    print('tente novamente!')   
+                       
+        elif pergunta == '4':
+            while True:
+                operacao = Operacoes()
+                operacao.listarDados()
+                perg = int(input('Deseja fazer nova pesquisa:\n1.sim\n2.não\n'))
+                if perg == 1:
+                    pass
+                elif perg == 2:
+                    break
+                else:
+                    print('Tente novamente!')
+                    
+        elif pergunta == '5':
+            break
+         
+        else:
+            print('Tente novamente!')
+              
+
+menu = Menu()
